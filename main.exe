@@ -1,0 +1,225 @@
+import pygame
+from random import randint
+from pygame.locals import *
+
+resolution = (1000,600)
+white = (255,255,255)
+black = (0,0,0)
+red = (255,0,0)
+blue = (0,0,255)
+gameDisplay = pygame.display.set_mode((500,500))
+screen = pygame.display.set_mode(resolution)
+objects = []
+def rectangle(what,i):
+    return (what.x_beginning  >= i.x_beginning and what.x_beginning <= i.x_beginning + i.scale[0]) and (what.y_beginning+25 >= i.y_beginning )
+class Cart:
+    image  ="begining.png"
+    scale = (200,200)
+    x_beginning = 500
+    y_beginning = 100
+    def display(self):
+        a = pygame.transform.scale(pygame.image.load(self.image), self.scale)
+        gameDisplay.blit(a, (self.x_beginning, self.y_beginning))
+
+class Object:
+    scale = (50,50)
+    image = "altm.png"
+    x_beginning = 0
+    y_beginning = 375
+
+    def display(self):
+     a = pygame.transform.scale(pygame.image.load(self.image),self.scale)
+     gameDisplay.blit(a,(self.x_beginning,self.y_beginning))
+class Character:
+ x_beginning = 10
+ y_beginning = 300
+ scale = (75,75)
+ flipped = False
+ type = "audzia"
+ hop = False
+ clicked = []
+ blocked = False
+ def block(self):
+  for i in objects:
+     if (rectangle(self,i)):
+        self.blocked = True
+ moves = [1,1,1,1,2,3,4]
+ moves2 = [1,2,2,2,2,3,4]
+
+ def gravity(self):
+      objects_y_beginnings = []
+      for i in objects:
+          if(self.x_beginning >= i.x_beginning and self.x_beginning <= i.x_beginning+i.scale[0]):
+
+           objects_y_beginnings.append(i.y_beginning)
+
+      while(min(objects_y_beginnings) > self.y_beginning+75):
+             self.y_beginning +=25
+
+
+ def body_part(self,image,scale,flip):
+    a = pygame.image.load(image)
+    keys = pygame.key.get_pressed()
+    if (self.clicked.__contains__("r") and flip == True):
+        self.flipped = False
+    elif(self.clicked.__contains__("l") and flip == False):
+        self.flipped = True
+    a = pygame.transform.flip(a,self.flipped, False)
+    return pygame.transform.scale(a, self.scale)
+
+
+ leg = type+"/leg.png"
+ leg2 = type+"/leg.png"
+
+ audzia_side = False
+ pyg = []
+
+ def character(self,flip2):
+   y_corpse_place = self.y_beginning-75
+
+   self.pyg.append(gameDisplay.blit(self.body_part(self.leg,self.scale,flip2),(self.x_beginning-15,self.y_beginning)))
+   self.pyg.append(gameDisplay.blit(self.body_part(self.leg2,self.scale,flip2),(self.x_beginning-15,self.y_beginning)))
+   self.pyg.append(gameDisplay.blit(self.body_part(self.type+"/corps.png",self.scale,flip2),(self.x_beginning,y_corpse_place)))
+   self.pyg.append(gameDisplay.blit(self.body_part(self.type+"/arm.png",self.scale,flip2),(self.x_beginning,y_corpse_place)))
+   self.pyg.append(gameDisplay.blit(self.body_part(self.type+"/hea.png",self.scale,flip2),(self.x_beginning,self.y_beginning-150)))
+
+ def go_right(self):
+
+     if(self.x_beginning <1000):
+      self.leg2  = self.type+"/leg2.png"
+      if(self.blocked == False):
+        self.x_beginning += 25
+      self.clicked.append("r")
+ def go_left(self):
+
+     if (self.x_beginning > 10):
+      self.leg2 = self.type+"/leg2.png"
+      if (self.blocked == False):
+          self.x_beginning -= 25
+      self.clicked.append("l")
+ def go_up(self):
+     self.leg = self.type+"/leg3.png"
+     self.leg2 = self.type+"/leg3.png"
+     self.y_beginning -= 75
+
+     self.clicked.append("u")
+ def go_down(self):
+     self.leg = self.type+"/leg3.png"
+     self.leg2 = self.type+"/leg3.png"
+     self.y_beginning += 25
+     self.clicked.append("d")
+
+ def walk(self):
+  self.hop = True
+
+  if(self.type == "audzia"):
+    keys = pygame.key.get_pressed()
+    self.hop = True
+    if(keys[pygame.K_RIGHT]):
+          self.go_right()
+
+    if(keys[pygame.K_UP]):
+        self.go_up()
+
+    if(keys[pygame.K_DOWN]):
+        self.go_down()
+
+    if (keys[pygame.K_LEFT]):
+        self.go_left()
+  elif(self.type == "boris"):
+     if(self.audzia_side == False):
+        rand = self.moves[randint(0,len(self.moves)-1)]
+     else:
+         rand = self.moves2[randint(0, len(self.moves2) - 1)]
+     if(rand == 1):
+         self.go_right()
+     elif(rand== 2):
+         self.go_left()
+     elif(rand == 3):
+         self.go_up()
+     else:
+         self.go_down()
+     return rand
+ def whiletrue(self):
+    if(self.hop == True):
+
+      if(self.clicked.__contains__("r")):
+          self.leg2 = self.type+"/leg.png"
+      if (self.clicked.__contains__("l")):
+          self.leg2 = self.type+"/leg.png"
+      if (self.clicked.__contains__("u")):
+          self.leg = self.type+"/leg.png"
+          self.leg2 = self.type+"/leg.png"
+          self.gravity()
+      if (self.clicked.__contains__("d")):
+          self.y_beginning -= 25
+          self.leg = self.type+"/leg.png"
+          self.leg2 = self.type+"/leg.png"
+      self.clicked = []
+      self.hop = False
+    self.walk()
+    self.character(self.flipped)
+    self.gravity()
+    self.blocked = False
+
+i = 0
+screen.fill(white)
+floor = Object()
+floor.scale = (1000, 50)
+carts = []
+second_object = Object()
+second_object.x_beginning = 500
+second_object.y_beginning = 325
+objects.append(second_object)
+objects.append(floor)
+floor.display()
+second_object.display()
+audzia = Character()
+boris = Character()
+boris.type = "boris"
+audzia.x_beginning =  300
+old_baf = 0
+
+beginning_cart = Cart()
+carts.append(beginning_cart)
+beginning_cart.display()
+while True:
+ #if(carts == []):
+    audzia.block()
+    boris.block()
+    audzia.whiletrue()
+    boris.whiletrue()
+
+    second_object = Object()
+    floor.scale = (1000, 50)
+    second_object.y_beginning = 325
+    second_object.x_beginning = 500
+    floor.display()
+    second_object.display()
+
+
+    pygame.display.flip()
+    if (audzia.x_beginning < boris.x_beginning):
+        boris.audzia_side = True
+    else:
+        boris.audzia_side = False
+    if((audzia.x_beginning >=0 and boris.x_beginning >= 0) or (audzia.x_beginning <= 0 and boris.x_beginning <= 0)):
+     boris_audzia_far = abs(abs(audzia.x_beginning) - abs(boris.x_beginning))
+    else:
+        boris_audzia_far = abs(audzia.x_beginning) + abs(boris.x_beginning)
+    if(old_baf > boris_audzia_far):
+        if(boris.audzia_side == False):
+            boris.moves.append(boris.walk())
+
+        else:
+            boris.moves2.append(boris.walk())
+
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+    i = 1
+
+    screen.fill(white)
+    old_baf = boris_audzia_far
+ #elif(pygame.mouse.get_pos()[0] > beginning_cart.x_beginning and pygame.mouse.get_pos()[0] < beginning_cart.x_beginning+beginning_cart.scale[0] and pygame.mouse.get_pos()[1] > beginning_cart.y_beginning and pygame.mouse.get_pos()[1] < beginning_cart.y_beginning+beginning_cart.scale[1]):
+     #carts = []
